@@ -1,6 +1,5 @@
 import serial
 import csv
-from multiprocessing import Process
 from threading import Thread
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -9,25 +8,29 @@ import pandas as pd
 from matplotlib.animation import FuncAnimation
 from itertools import count
 
+path_to_csv = 'C:/Users/lukas/Documents/fc.csv' #path to writeable csv file
 
-class SerialReadProcess:  
+
+###-------Start Separate Thread-------###
+
+class SerialReadThread:  
     def __init__(self):
         self._running = True
 
     def terminate(self):  
         self._running = False  
 
-    def run(self):
+    #Everything in this function runs as a separate thread
+    def run(self):     
         arduino_port = "COM16" #o uno runs at 9600 baud
-        fileName="C:/Users/lukas/Documents/fc.csv" #name of the CSV file generated
         ser = serial.Serial(arduino_port, 115200)
         ser.flushInput()
         print("Connected to Arduino port:" + arduino_port)
-        file = open(fileName, "w")
+        file = open(path_to_csv, "w")
         print("Created file")
         samples = 100000000 #how many samples to collect
         line = 0 #start at 0 because our header is 0 (not real data)
-        with open(fileName, "a", newline='') as csvfile:
+        with open(path_to_csv, "a", newline='') as csvfile:
             writer = csv.writer(csvfile,delimiter=",")
             writer.writerow("time,lat,long,alt,sats,magx,magy,magz,temp,pres,bar_alt,vert_vel,bat_state,counter".split(sep=","))
             line = line +1
@@ -38,18 +41,23 @@ class SerialReadProcess:
             data = str(line) + "," + data
             print(data)
             data_list = data.split(sep=",")
-            with open(fileName, "a", newline='') as csvfile:
+            with open(path_to_csv, "a", newline='') as csvfile:
                 writer = csv.writer(csvfile,delimiter=",")
                 writer.writerow(data_list)
                 line = line + 1
         print("Data collection complete!")
         file.close()
-        
-SerialRead = SerialReadProcess()
-#Create 
-SerProcess = Process(target=SerialRead.run) 
+    
+#instantiate SerialReadThread object
+SerialRead = SerialReadThread()
+#Create Thread
+SerThread = Thread(target=SerialRead.run) 
 #Start Thread 
-SerProcess.start()
+SerThread.start()
+
+
+
+###-------Plotting-------###
 
 plt.style.use('seaborn')
 plt.style.use('dark_background')
@@ -63,14 +71,12 @@ mpl.rcParams['xtick.major.size'] = 5
 mpl.rcParams['xtick.major.width'] = 0.5
 mpl.rcParams['ytick.major.size'] = 5
 mpl.rcParams['ytick.major.width'] = 0.5
-#fig = plt.figure(figsize=(5, 4))
-#atrums = fig.add_subplot(111)
+
  
 fig, ([augstums, atrums], [tt, bilde]) = plt.subplots(nrows=2, ncols=2, figsize=(10,12), linewidth=5, edgecolor="#4d7791")
-#index = count()
  
 def animate(i):
-    data = pd.read_csv('C:/Users/lukas/Documents/fc.csv')
+    data = pd.read_csv(path_to_csv)
     a = data['time']
     b = data['lat']
     c = data['long']
@@ -120,7 +126,6 @@ def animate(i):
     nnn = ("%.1f" % (nn['counter'].iloc[-1]))
     
  
- 
     atrums.cla()
     augstums.cla()
   
@@ -129,15 +134,12 @@ def animate(i):
     augstums.set_title('h= ' + str(ddd) + 'm', fontsize=50)
     augstums.grid(False)
  
-    #plotting mag for tests
     plt.tight_layout()
     atrums.plot(a, g, color='#a88ca7', linewidth=2) # #a88ca7 white #f0d5ef black
     atrums.set_title('v= ' + str(ggg) + 'm/s', fontsize=50)
     atrums.grid(False)
  
- 
-   
-    
+
     #TABULA
     data = [[aaa],[bbb],[ccc],[ddd],[eee],[fff],[ggg],[hhh],[iii],[jjj],[kkk],[lll],[mmm],[nnn]]
     rows = ('Laiks', 'lat', 'lng', 'alt', 'sats', 'magx','magy','magz','temp','pres','bar_alt','vert_vel','bat_state','counter')

@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from matplotlib.animation import FuncAnimation
-from itertools import count
 
 path_to_csv = 'C:/Users/lukas/Documents/fc.csv' #path to writeable csv file
 
@@ -32,7 +31,7 @@ class SerialReadThread:
         line = 0 #start at 0 because our header is 0 (not real data)
         with open(path_to_csv, "a", newline='') as csvfile:
             writer = csv.writer(csvfile,delimiter=",")
-            writer.writerow("time,lat,long,alt,sats,magx,magy,magz,temp,pres,bar_alt,vert_vel,bat_state,counter".split(sep=","))
+            writer.writerow("time,lat,long,alt,sats,magx,magy,magz,temp,bar_alt,vert_vel,bat_state,counter".split(sep=","))
             line = line +1
 
         while self._running and line <= samples:
@@ -86,7 +85,6 @@ def animate(i):
     g = data['magy']
     h = data['magz']
     i = data['temp']
-    j = data['pres']
     k = data['bar_alt']
     l = data['vert_vel']
     m = data['bat_state']
@@ -102,7 +100,6 @@ def animate(i):
     gg=pd.DataFrame(data=g)
     hh=pd.DataFrame(data=h)
     ii=pd.DataFrame(data=i)
-    jj=pd.DataFrame(data=j)
     kk=pd.DataFrame(data=k)
     ll=pd.DataFrame(data=l)
     mm=pd.DataFrame(data=m)
@@ -119,7 +116,6 @@ def animate(i):
     ggg = ("%.1f" % (gg['magy'].iloc[-1]))
     hhh = ("%.1f" % (hh['magz'].iloc[-1]))
     iii = ("%.1f" % (ii['temp'].iloc[-1]))
-    jjj = ("%.1f" % (jj['pres'].iloc[-1]))
     kkk = ("%.1f" % (kk['bar_alt'].iloc[-1]))
     lll = ("%.1f" % (ll['vert_vel'].iloc[-1]))
     mmm = ("%.1f" % (mm['bat_state'].iloc[-1]))
@@ -130,27 +126,29 @@ def animate(i):
     augstums.cla()
   
     plt.tight_layout() 
-    augstums.plot(a, d, color='#a5c6d4', linewidth=2) # #a88ca7 white #f0d5ef black
+    augstums.plot(a, k, color='#a5c6d4', linewidth=2) # #a88ca7 white #f0d5ef black
     augstums.set_title('h= ' + str(ddd) + 'm', fontsize=50)
     augstums.grid(False)
  
+    
+    '''Plotting magneotmeter for refference'''
     plt.tight_layout()
-    atrums.plot(a, g, color='#a88ca7', linewidth=2) # #a88ca7 white #f0d5ef black
+    atrums.plot(a, g, color='#a88ca7', linewidth=2) # #a88ca7 white #f0d5ef black 
     atrums.set_title('v= ' + str(ggg) + 'm/s', fontsize=50)
     atrums.grid(False)
  
 
     #TABULA
-    data = [[aaa],[bbb],[ccc],[ddd],[eee],[fff],[ggg],[hhh],[iii],[jjj],[kkk],[lll],[mmm],[nnn]]
-    rows = ('Laiks', 'lat', 'lng', 'alt', 'sats', 'magx','magy','magz','temp','pres','bar_alt','vert_vel','bat_state','counter')
-    cell_colors = [['tab:grey'],  ['tab:grey'], ['tab:grey'], ['tab:grey'], ['tab:grey'],['tab:grey'], ['tab:grey'], ['tab:grey'],
+    data = [[aaa],[bbb],[ccc],[ddd],[eee],[fff],[ggg],[hhh],[iii],[kkk],[lll],[mmm],[nnn]]
+    rows = ('Laiks', 'lat', 'lng', 'alt', 'sats', 'magx','magy','magz','temp','bar_alt','vert_vel','bat_state','counter')
+    cell_colors = [['tab:grey'], ['tab:grey'], ['tab:grey'], ['tab:grey'],['tab:grey'], ['tab:grey'], ['tab:grey'],
                    ['tab:grey'], ['tab:grey'], ['tab:grey'], ['tab:grey'], ['tab:grey'], ['tab:grey']]
  
     tt.set_axis_off() 
     table = tt.table( 
         cellText = data, 
         rowLabels = rows,  
-        rowColours =["#1b261e"] * 14,
+        rowColours =["#1b261e"] * 13,
         cellColours = cell_colors,
         cellLoc ='center',
         colWidths = [0.15, 0.25],

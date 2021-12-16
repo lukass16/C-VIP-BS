@@ -27,7 +27,7 @@ class SerialReadThread:
     def __init__(self):
         self._running = True
 
-    def terminate(self):  
+    def terminate(self):
         self._running = False
 
     #Everything in this function runs as a separate thread
